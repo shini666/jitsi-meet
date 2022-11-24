@@ -67,7 +67,7 @@ const useStyles = makeStyles()(theme => {
             flexDirection: 'column',
             height: 'auto',
             minHeight: '200px',
-            maxHeight: '560px',
+            maxHeight: '760px',
             marginTop: '64px',
             animation: `${keyframes`
                 0% {
@@ -137,6 +137,12 @@ const useStyles = makeStyles()(theme => {
             justifyContent: 'space-between'
         },
 
+        closeIcon: {
+            '&:focus': {
+                boxShadow: 'none'
+            }
+        },
+
         title: {
             color: theme.palette.text01,
             ...withPixelLineHeight(theme.typography.heading5),
@@ -190,6 +196,7 @@ interface IDialogProps {
     children?: React.ReactNode;
     className?: string;
     description?: string;
+    disableAutoHideOnSubmit?: boolean;
     disableBackdropClose?: boolean;
     disableEnter?: boolean;
     hideCloseButton?: boolean;
@@ -211,6 +218,7 @@ const Dialog = ({
     children,
     className,
     description,
+    disableAutoHideOnSubmit = false,
     disableBackdropClose,
     hideCloseButton,
     disableEnter,
@@ -232,7 +240,7 @@ const Dialog = ({
     }, [ onCancel ]);
 
     const submit = useCallback(() => {
-        dispatch(hideDialog());
+        !disableAutoHideOnSubmit && dispatch(hideDialog());
         onSubmit?.();
     }, [ onSubmit ]);
 
@@ -276,6 +284,7 @@ const Dialog = ({
                         {!hideCloseButton && (
                             <ClickableIcon
                                 accessibilityLabel = { t('dialog.close') }
+                                className = { classes.closeIcon }
                                 icon = { IconCloseLarge }
                                 id = 'modal-header-close-button'
                                 onClick = { onClose } />

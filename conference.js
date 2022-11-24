@@ -44,6 +44,7 @@ import {
     conferenceUniqueIdSet,
     conferenceWillJoin,
     conferenceWillLeave,
+    dataChannelClosed,
     dataChannelOpened,
     e2eRttChanged,
     getConferenceOptions,
@@ -54,10 +55,7 @@ import {
     p2pStatusChanged,
     sendLocalParticipant
 } from './react/features/base/conference';
-import {
-    getMultipleVideoSendingSupportFeatureFlag,
-    getReplaceParticipant
-} from './react/features/base/config/functions';
+import { getReplaceParticipant } from './react/features/base/config/functions';
 import {
     checkAndNotifyForNewDevice,
     getAvailableDevices,
@@ -134,9 +132,12 @@ import {
 import { maybeSetLobbyChatMessageListener } from './react/features/lobby/actions.any';
 import { setNoiseSuppressionEnabled } from './react/features/noise-suppression/actions';
 import {
+    DATA_CHANNEL_CLOSED_NOTIFICATION_ID,
     NOTIFICATION_TIMEOUT_TYPE,
+    hideNotification,
     isModerationNotificationDisplayed,
-    showNotification
+    showNotification,
+    showWarningNotification
 } from './react/features/notifications';
 import { mediaPermissionPromptVisibilityChanged } from './react/features/overlay';
 import { suspendDetected } from './react/features/power-monitor';
@@ -1418,30 +1419,13 @@ export default {
                     return;
                 }
 
-                // In the multi-stream mode, add the track to the conference if there is no existing track, replace it
-                // otherwise.
-                if (getMultipleVideoSendingSupportFeatureFlag(state)) {
-                    const trackAction = oldTrack
-                        ? replaceLocalTrack(oldTrack, newTrack, room)
-                        : addLocalTrack(newTrack);
+                // Add the track to the conference if there is no existing track, replace it otherwise.
+                const trackAction = oldTrack
+                    ? replaceLocalTrack(oldTrack, newTrack, room)
+                    : addLocalTrack(newTrack);
 
-                    APP.store.dispatch(trackAction)
-                        .then(() => {
-                            this.setVideoMuteStatus();
-                        })
-                        .then(resolve)
-                        .catch(error => {
-                            logger.error(`useVideoStream failed: ${error}`);
-                            reject(error);
-                        })
-                        .then(onFinish);
-
-                    return;
-                }
-                APP.store.dispatch(
-                    replaceLocalTrack(oldTrack, newTrack, room))
+                APP.store.dispatch(trackAction)
                     .then(() => {
-                        this._setSharingScreen(newTrack);
                         this.setVideoMuteStatus();
                     })
                     .then(resolve)
@@ -2067,6 +2051,18 @@ export default {
         room.on(
             JitsiConferenceEvents.DATA_CHANNEL_OPENED, () => {
                 APP.store.dispatch(dataChannelOpened());
+                APP.store.dispatch(hideNotification(DATA_CHANNEL_CLOSED_NOTIFICATION_ID));
+            }
+        );
+
+        room.on(
+            JitsiConferenceEvents.DATA_CHANNEL_CLOSED, ev => {
+                APP.store.dispatch(dataChannelClosed(ev.code, ev.reason));
+                APP.store.dispatch(showWarningNotification({
+                    descriptionKey: 'notify.dataChannelClosedDescription',
+                    titleKey: 'notify.dataChannelClosed',
+                    uid: DATA_CHANNEL_CLOSED_NOTIFICATION_ID
+                }, NOTIFICATION_TIMEOUT_TYPE.STICKY));
             }
         );
 

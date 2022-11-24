@@ -66,12 +66,15 @@ const Button: React.FC<IProps> = ({
     }
 
     if (type === TERTIARY) {
+        buttonLabelStyles
+            = disabled ? styles.buttonLabelTertiaryDisabled : styles.buttonLabelTertiary;
+
         return (
             <TouchableRipple
                 accessibilityLabel = { accessibilityLabel }
                 disabled = { disabled }
                 onPress = { onPress }
-                rippleColor = 'transparent'
+                rippleColor = { BaseTheme.palette.action03Active }
                 style = { [
                     buttonStyles,
                     style

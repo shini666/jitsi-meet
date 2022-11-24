@@ -107,7 +107,7 @@ const Prejoin: React.FC<IPrejoinProps> = ({ navigation }: IPrejoinProps) => {
     };
 
     const { PRIMARY, TERTIARY } = BUTTON_TYPES;
-    const joinButtonDisabled = isJoining || (!displayName && isDisplayNameMandatory);
+    const joinButtonDisabled = !displayName && isDisplayNameMandatory;
 
     useEffect(() => {
         BackHandler.addEventListener('hardwareBackPress', goBack);
@@ -126,24 +126,21 @@ const Prejoin: React.FC<IPrejoinProps> = ({ navigation }: IPrejoinProps) => {
     let contentWrapperStyles;
     let contentContainerStyles;
     let largeVideoContainerStyles;
-    let toolboxContainerStyles;
 
     if (aspectRatio === ASPECT_RATIO_NARROW) {
         contentWrapperStyles = styles.contentWrapper;
         contentContainerStyles = styles.contentContainer;
         largeVideoContainerStyles = styles.largeVideoContainer;
-        toolboxContainerStyles = styles.toolboxContainer;
     } else {
         contentWrapperStyles = styles.contentWrapperWide;
         contentContainerStyles = styles.contentContainerWide;
         largeVideoContainerStyles = styles.largeVideoContainerWide;
-        toolboxContainerStyles = styles.toolboxContainerWide;
     }
 
     return (
         <JitsiScreen
             addBottomPadding = { false }
-            safeAreaInsets = { [ 'left' ] }
+            safeAreaInsets = { [ 'right' ] }
             style = { contentWrapperStyles }>
             <BrandingImageBackground />
             {
@@ -156,11 +153,12 @@ const Prejoin: React.FC<IPrejoinProps> = ({ navigation }: IPrejoinProps) => {
                             { roomName }
                         </Text>
                     </View>
+                    {/* @ts-ignore */}
                     <LargeVideo />
                 </View>
             }
             <View style = { contentContainerStyles }>
-                <View style = { toolboxContainerStyles }>
+                <View style = { styles.toolboxContainer }>
                     <AudioMuteButton
                         // @ts-ignore
                         styles = { styles.buttonStylesBorderless } />
@@ -179,15 +177,16 @@ const Prejoin: React.FC<IPrejoinProps> = ({ navigation }: IPrejoinProps) => {
                         accessibilityLabel = 'prejoin.joinMeeting'
                         disabled = { joinButtonDisabled }
                         labelKey = 'prejoin.joinMeeting'
-                        onClick = { onJoin }
+                        // @ts-ignore
+                        onClick = { !isJoining && onJoin }
                         style = { styles.joinButton }
                         type = { PRIMARY } />
                     <Button
                         accessibilityLabel = 'prejoin.joinMeetingInLowBandwidthMode'
                         disabled = { joinButtonDisabled }
                         labelKey = 'prejoin.joinMeetingInLowBandwidthMode'
-                        labelStyle = { styles.joinLowBandwidthLabel }
                         onClick = { onJoinLowBandwidth }
+                        style = { styles.joinButton }
                         type = { TERTIARY } />
                 </View>
             </View>
