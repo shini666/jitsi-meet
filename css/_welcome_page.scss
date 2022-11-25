@@ -310,3 +310,67 @@ body.welcome-page {
         margin-right: 16px;
     }
 }
+
+.welcome {
+    background-image: $welcomePageHeaderBackground;
+    background-position: $welcomePageHeaderBackgroundPosition;
+    background-repeat: $welcomePageHeaderBackgroundRepeat;
+    background-size: $welcomePageHeaderBackgroundSize;
+    justify-content: none;
+
+    &.without-content {
+        .welcome-card {
+            min-width: 500px;
+            max-width: 560px;
+        }
+    }
+}
+
+.welcome .header {
+         background-image: none;
+         background-position: none;
+         background-repeat: none;
+         background-size: none;
+         display: flex;
+         overflow: hidden;
+         position: relative;
+         align-items: center;
+         justify-content: center;
+}
+
+.welcome .header .header-container {
+         min-width: 500px;
+         max-width: 580px;
+         width: 100%;
+}
+
+.welcome  #enter_room {
+          max-width: 570px;
+          width: calc(100% - 32px);
+}
+
+.welcome welcome-page-button {
+        background: #00325a;
+
+         &:focus-within {
+            outline: auto 2px #022e61;
+        }
+}
+
+.welcome .welcome-cards-container {
+        height: auto;
+        color: #131519;
+        padding-top: 32px;
+}
+
+.welcome .welcome-card-row {
+         padding: 0 32px 40px;
+}
+
+.welcome .welcome-card {
+         width: 100%;
+
+         &--blue {
+                 background-color: rgba(0, 75, 136, 0.8);
+         }
+}

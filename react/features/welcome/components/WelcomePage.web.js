@@ -274,7 +274,7 @@ class WelcomePage extends AbstractWelcomePage {
                             ref = { this._setAdditionalContentRef } />
                         : null }
                 </div>
-                { DISPLAY_WELCOME_FOOTER && this._renderFooter()}
+                { DISPLAY_WELCOME_FOOTER }
             </div>
 
         );

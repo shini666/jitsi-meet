@@ -10,6 +10,8 @@ import isInsecureRoomName from '../../base/util/isInsecureRoomName';
 import { isCalendarEnabled } from '../../calendar-sync';
 import { isRecentListEnabled } from '../../recent-list/functions';
 
+import { generateRandomRoomNameNISZ } from './NISZCustomRoomNameGenerator';
+
 /**
  * {@code AbstractWelcomePage}'s React {@code Component} prop types.
  */
@@ -242,7 +244,7 @@ export class AbstractWelcomePage<P: Props> extends Component<P, *> {
      * @returns {void}
      */
     _updateRoomname() {
-        const generatedRoomname = generateRoomWithoutSeparator();
+        const generatedRoomname = generateRandomRoomNameNISZ();//generateRoomWithoutSeparator();
         const roomPlaceholder = '';
         const updateTimeoutId = setTimeout(this._updateRoomname, 10000);
 
