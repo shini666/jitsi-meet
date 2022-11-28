@@ -72,6 +72,10 @@
              align-items: center;
              min-height: 100%;
 
+             .header {
+                     background-color: transparent;
+             }
+
              .header .header-container {
                      min-width: auto;
                      margin-top: 110px;
