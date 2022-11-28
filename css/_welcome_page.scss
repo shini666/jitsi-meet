@@ -316,7 +316,7 @@ body.welcome-page {
     background-position: $welcomePageHeaderBackgroundPosition;
     background-repeat: $welcomePageHeaderBackgroundRepeat;
     background-size: $welcomePageHeaderBackgroundSize;
-    justify-content: none;
+    justify-content: normal;
 
     &.without-content {
         .welcome-card {
@@ -327,10 +327,11 @@ body.welcome-page {
 }
 
 .welcome .header {
+		 background-color: unset;
          background-image: none;
-         background-position: none;
-         background-repeat: none;
-         background-size: none;
+         background-position: unset;
+         background-repeat: unset;
+         background-size: auto;
          display: flex;
          overflow: hidden;
          position: relative;
@@ -349,7 +350,7 @@ body.welcome-page {
           width: calc(100% - 32px);
 }
 
-.welcome welcome-page-button {
+.welcome .welcome-page-button {
         background: #00325a;
 
          &:focus-within {
