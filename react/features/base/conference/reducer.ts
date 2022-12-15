@@ -46,6 +46,7 @@ export interface IJitsiConference {
     avModerationApprove: Function;
     avModerationReject: Function;
     createVideoSIPGWSession: Function;
+    dial: Function;
     disableAVModeration: Function;
     enableAVModeration: Function;
     end: Function;
@@ -59,6 +60,7 @@ export interface IJitsiConference {
     grantOwner: Function;
     isAVModerationSupported: Function;
     isCallstatsEnabled: Function;
+    isE2EEEnabled: Function;
     isEndConferenceSupported: Function;
     isLobbySupported: Function;
     isSIPCallingSupported: Function;
@@ -71,7 +73,9 @@ export interface IJitsiConference {
     muteParticipant: Function;
     myLobbyUserId: Function;
     myUserId: Function;
+    off: Function;
     on: Function;
+    options: any;
     removeTrack: Function;
     replaceTrack: Function;
     room: IJitsiConferenceRoom;
@@ -88,6 +92,7 @@ export interface IJitsiConference {
     setReceiverConstraints: Function;
     setSenderVideoConstraint: Function;
     setSubject: Function;
+    startVerification: Function;
 }
 
 export interface IConferenceState {

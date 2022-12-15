@@ -47,6 +47,7 @@ import {
     dataChannelClosed,
     dataChannelOpened,
     e2eRttChanged,
+    generateVisitorConfig,
     getConferenceOptions,
     kickedOut,
     lockStateChanged,
@@ -277,7 +278,8 @@ class ConferenceConnector {
     /**
      *
      */
-    constructor(resolve, reject) {
+    constructor(resolve, reject, conference) {
+        this._conference = conference;
         this._resolve = resolve;
         this._reject = reject;
         this.reconnectTimeout = null;
@@ -333,6 +335,26 @@ class ConferenceConnector {
             const [ code, msg ] = params;
 
             APP.UI.notifyReservationError(code, msg);
+            break;
+        }
+
+        case JitsiConferenceErrors.REDIRECTED: {
+            generateVisitorConfig(APP.store.getState(), params);
+
+            connection.disconnect().then(() => {
+                connect(this._conference.roomName).then(con => {
+                    const localTracks = getLocalTracks(APP.store.getState()['features/base/tracks']);
+
+                    const jitsiTracks = localTracks.map(t => t.jitsiTrack);
+
+                    // visitors connect muted
+                    jitsiTracks.forEach(t => t.mute());
+
+                    // TODO disable option to unmute audio or video
+                    this._conference.startConference(con, jitsiTracks);
+                });
+            });
+
             break;
         }
 
@@ -458,6 +480,11 @@ export default {
      * the tracks won't exist).
      */
     _localTracksInitialized: false,
+
+    /**
+     * Flag used to prevent the creation of another local video track in this.muteVideo if one is already in progress.
+     */
+    isCreatingLocalTrack: false,
 
     isSharingScreen: false,
 
@@ -727,7 +754,7 @@ export default {
         // XXX The API will take care of disconnecting from the XMPP
         // server (and, thus, leaving the room) on unload.
         return new Promise((resolve, reject) => {
-            new ConferenceConnector(resolve, reject).connect();
+            new ConferenceConnector(resolve, reject, this).connect();
         });
     },
 
@@ -1028,10 +1055,12 @@ export default {
 
         const localVideo = getLocalJitsiVideoTrack(APP.store.getState());
 
-        if (!localVideo && !mute) {
+        if (!localVideo && !mute && !this.isCreatingLocalTrack) {
             const maybeShowErrorDialog = error => {
                 showUI && APP.store.dispatch(notifyCameraError(error));
             };
+
+            this.isCreatingLocalTrack = true;
 
             // Try to create local video if there wasn't any.
             // This handles the case when user joined with no video
@@ -1054,6 +1083,9 @@ export default {
                     logger.debug(`muteVideo: calling useVideoStream for track: ${videoTrack}`);
 
                     return this.useVideoStream(videoTrack);
+                })
+                .finally(() => {
+                    this.isCreatingLocalTrack = false;
                 });
         } else {
             // FIXME show error dialog if it fails (should be handled by react)
@@ -1339,7 +1371,7 @@ export default {
         this._createRoom(localTracks);
 
         return new Promise((resolve, reject) => {
-            new ConferenceConnector(resolve, reject).connect();
+            new ConferenceConnector(resolve, reject, this).connect();
         });
     },
 

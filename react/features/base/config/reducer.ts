@@ -77,6 +77,7 @@ export interface IConfigState extends IConfig {
     analysis?: {
         obfuscateRoomName?: boolean;
     };
+    disableRemoteControl?: boolean;
     error?: Error;
 }
 
@@ -335,6 +336,13 @@ function _translateLegacyConfig(oldValue: IConfig) {
                     = (newValue.conferenceInfo.autoHide ?? []).filter(c => !CONFERENCE_HEADER_MAPPING[key].includes(c));
             }
         });
+    }
+
+    newValue.welcomePage = oldValue.welcomePage || {};
+    if (oldValue.hasOwnProperty('enableWelcomePage')
+        && !newValue.welcomePage.hasOwnProperty('disabled')
+    ) {
+        newValue.welcomePage.disabled = !oldValue.enableWelcomePage;
     }
 
     newValue.prejoinConfig = oldValue.prejoinConfig || {};

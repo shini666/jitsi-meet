@@ -12,8 +12,7 @@ import { connect } from '../../../../base/redux/functions';
 import Dialog from '../../../../base/ui/components/web/Dialog';
 import { isDynamicBrandingDataLoaded } from '../../../../dynamic-branding/functions.any';
 import { isVpaasMeeting } from '../../../../jaas/functions';
-// @ts-ignore
-import { getActiveSession } from '../../../../recording';
+import { getActiveSession } from '../../../../recording/functions';
 // @ts-ignore
 import { updateDialInNumbers } from '../../../actions';
 import {
@@ -206,7 +205,7 @@ function mapStateToProps(state: IReduxState, ownProps: Partial<IProps>) {
     const addPeopleEnabled = isAddPeopleEnabled(state);
     const dialOutEnabled = isDialOutEnabled(state);
     const hideInviteContacts = iAmRecorder || (!addPeopleEnabled && !dialOutEnabled);
-    const dialIn = state['features/invite'];
+    const dialIn = state['features/invite']; // @ts-ignore
     const phoneNumber = dialIn?.numbers ? _getDefaultPhoneNumber(dialIn.numbers) : undefined;
 
     return {
