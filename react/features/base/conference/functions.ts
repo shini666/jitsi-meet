@@ -14,8 +14,11 @@ import {
 } from '../participants/actions';
 import { getLocalParticipant } from '../participants/functions';
 import { toState } from '../redux/functions';
-import { getJitsiMeetGlobalNS } from '../util/helpers';
-import { getBackendSafePath, safeDecodeURIComponent } from '../util/uri';
+import {
+    appendURLParam,
+    getBackendSafePath,
+    safeDecodeURIComponent
+} from '../util/uri';
 
 import { setObfuscatedRoom } from './actions';
 import {
@@ -102,7 +105,8 @@ export function commonUserJoinedHandling(
             name: displayName,
             presence: user.getStatus(),
             role: user.getRole(),
-            isReplacing
+            isReplacing,
+            sources: user.getSources()
         }));
     }
 }
@@ -245,15 +249,13 @@ export function getConferenceOptions(stateful: IStateful) {
         delete config.analytics?.googleAnalyticsTrackingId;
         delete options.callStatsID;
         delete options.callStatsSecret;
-    } else {
-        options.getWiFiStatsMethod = getWiFiStatsMethod;
     }
 
     return options;
 }
 
 /**
- * Returns an object aggregating the conference options.
+ * Override the global config (that is, window.config) with XMPP configuration required to join as a visitor.
  *
  * @param {IStateful} stateful - The redux store state.
  * @param {Array<string>} params - The received parameters.
@@ -274,10 +276,17 @@ export function generateVisitorConfig(stateful: IStateful, params: Array<string>
 
     config.hosts.domain = `${vnode}.meet.jitsi`;
     config.hosts.muc = config.hosts.muc.replace(oldDomain, config.hosts.domain);
-    config.hosts.visitorFocus = focusJid;
+    config.focusUserJid = focusJid;
 
-    config.bosh += `?vnode=${vnode}`;
-    config.websocket += `?vnode=${vnode}`;
+    // This flag disables sending the initial conference request
+    config.disableFocus = true;
+
+    if (config.bosh) {
+        config.bosh = appendURLParam(config.bosh, 'vnode', vnode);
+    }
+    if (config.websocket) {
+        config.websocket = appendURLParam(config.websocket, 'vnode', vnode);
+    }
 }
 
 /**
@@ -369,21 +378,6 @@ export function getAnalyticsRoomName(state: IReduxState, dispatch: IStore['dispa
     }
 
     return getRoomName(state);
-}
-
-/**
- * Returns the result of getWiFiStats from the global NS or does nothing
- * (returns empty result).
- * Fixes a concurrency problem where we need to pass a function when creating
- * a JitsiConference, but that method is added to the context later.
- *
- * @returns {Promise}
- * @private
- */
-function getWiFiStatsMethod() {
-    const gloabalNS = getJitsiMeetGlobalNS();
-
-    return gloabalNS.getWiFiStats ? gloabalNS.getWiFiStats() : Promise.resolve('{}');
 }
 
 /**

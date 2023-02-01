@@ -79,7 +79,6 @@ $modalTextColor: #333;
 $chatActionsSeparatorColor: rgb(173, 105, 112);
 $chatBackgroundColor: #131519;
 $chatInputSeparatorColor: #A4B8D1;
-$chatLobbyMessageBackgroundColor: #6A50D3;
 $chatLobbyActionsSeparatorColor: #6A50D3;
 $chatLocalMessageBackgroundColor: #484A4F;
 $chatPrivateMessageBackgroundColor: rgb(153, 69, 77);
@@ -170,8 +169,9 @@ $welcomePageHeaderPaddingBottom: 0px;
 $welcomePageHeaderTitleMaxWidth: initial;
 $welcomePageHeaderTextAlign: center;
 
+$welcomePageHeaderContainerMarginTop: 104px;
 $welcomePageHeaderContainerDisplay: flex;
-$welcomePageHeaderContainerMargin: 104px 32px 0 32px;
+$welcomePageHeaderContainerMargin: $welcomePageHeaderContainerMarginTop auto 0;
 
 $welcomePageHeaderTextTitleMarginBottom: 0;
 $welcomePageHeaderTextTitleFontSize: 42px;
