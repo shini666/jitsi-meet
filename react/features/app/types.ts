@@ -90,6 +90,7 @@ export interface IReduxState {
     'features/background': IBackgroundState;
     'features/base/app': IAppState;
     'features/base/audio-only': IAudioOnlyState;
+    'features/base/color-scheme': any;
     'features/base/conference': IConferenceState;
     'features/base/config': IConfigState;
     'features/base/connection': IConnectionState;
@@ -163,4 +164,8 @@ export interface IReduxState {
     'features/videosipgw': IVideoSipGW;
     'features/virtual-background': IVirtualBackground;
     'features/whiteboard': IWhiteboardState;
+}
+
+export interface IReloadNowOptions {
+    hidePrejoin?: boolean;
 }

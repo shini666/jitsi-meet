@@ -2,7 +2,7 @@
 import { withStyles } from '@mui/styles';
 import React, { Component } from 'react';
 import { WithTranslation } from 'react-i18next';
-import { batch } from 'react-redux';
+import { batch, connect } from 'react-redux';
 
 // @ts-expect-error
 import keyboardShortcut from '../../../../../modules/keyboardshortcut/keyboardshortcut';
@@ -10,7 +10,9 @@ import { isSpeakerStatsDisabled } from '../../../../features/speaker-stats/funct
 import { ACTION_SHORTCUT_TRIGGERED, createShortcutEvent, createToolbarEvent } from '../../../analytics/AnalyticsEvents';
 import { sendAnalytics } from '../../../analytics/functions';
 import { IReduxState } from '../../../app/types';
+import { IJitsiConference } from '../../../base/conference/reducer';
 import {
+    getButtonsWithNotifyClick,
     getMultipleVideoSendingSupportFeatureFlag,
     getToolbarButtons,
     isToolbarButtonEnabled
@@ -24,10 +26,11 @@ import {
 } from '../../../base/participants/actions';
 import {
     getLocalParticipant,
-    hasRaisedHand
+    hasRaisedHand,
+    isLocalParticipantModerator
 } from '../../../base/participants/functions';
-import { connect } from '../../../base/redux/functions';
 import { getLocalVideoTrack } from '../../../base/tracks/functions';
+import { ITrack } from '../../../base/tracks/types';
 import ContextMenu from '../../../base/ui/components/web/ContextMenu';
 import ContextMenuItemGroup from '../../../base/ui/components/web/ContextMenuItemGroup';
 import { toggleChat } from '../../../chat/actions.web';
@@ -50,7 +53,7 @@ import { NoiseSuppressionButton } from '../../../noise-suppression/components';
 import {
     close as closeParticipantsPane,
     open as openParticipantsPane
-} from '../../../participants-pane/actions';
+} from '../../../participants-pane/actions.web';
 // @ts-ignore
 import { ParticipantsPaneButton } from '../../../participants-pane/components/web';
 import { getParticipantsPaneOpen } from '../../../participants-pane/functions';
@@ -118,6 +121,7 @@ import HelpButton from '../HelpButton';
 
 // @ts-ignore
 import AudioSettingsButton from './AudioSettingsButton';
+import CustomOptionButton from './CustomOptionButton';
 import { EndConferenceButton } from './EndConferenceButton';
 // @ts-ignore
 import FullscreenButton from './FullscreenButton';
@@ -137,6 +141,7 @@ import ShareDesktopButton from './ShareDesktopButton';
 import ToggleCameraButton from './ToggleCameraButton';
 // @ts-ignore
 import VideoSettingsButton from './VideoSettingsButton';
+/* eslint-enable lines-around-comment */
 
 /**
  * The type of the React {@code Component} props of {@link Toolbox}.
@@ -146,12 +151,12 @@ interface IProps extends WithTranslation {
     /**
      * String showing if the virtual background type is desktop-share.
      */
-    _backgroundType: String;
+    _backgroundType: string;
 
     /**
      * Toolbar buttons which have their click exposed through the API.
      */
-    _buttonsWithNotifyClick: Array<string | {
+    _buttonsWithNotifyClick?: Array<string | {
         key: string;
         preventExecution: boolean;
     }>;
@@ -169,7 +174,12 @@ interface IProps extends WithTranslation {
     /**
      * The {@code JitsiConference} for the current conference.
      */
-    _conference: Object;
+    _conference?: IJitsiConference;
+
+    /**
+     * Custom Toolbar buttons.
+     */
+    _customToolbarButtons?: Array<{ icon: string; id: string; text: string; }>;
 
     /**
      * Whether or not screensharing button is disabled.
@@ -204,7 +214,7 @@ interface IProps extends WithTranslation {
     /**
      * Whether or not the app is currently in full screen.
      */
-    _fullScreen: boolean;
+    _fullScreen?: boolean;
 
     /**
      * Whether or not the GIFs feature is enabled.
@@ -244,7 +254,7 @@ interface IProps extends WithTranslation {
     /**
      * Whether or not speaker stats is disable.
      */
-    _isSpeakerStatsDisabled: boolean;
+    _isSpeakerStatsDisabled?: boolean;
 
 
     /**
@@ -260,12 +270,12 @@ interface IProps extends WithTranslation {
     /**
      * The ID of the local participant.
      */
-    _localParticipantID: String;
+    _localParticipantID?: string;
 
     /**
      * The JitsiLocalTrack to display.
      */
-    _localVideo: Object;
+    _localVideo?: ITrack;
 
     /**
      * Whether or not multi-stream send support is enabled.
@@ -305,7 +315,7 @@ interface IProps extends WithTranslation {
     /**
      * Whether or not the local participant is sharing a YouTube video.
      */
-    _sharingVideo: boolean;
+    _sharingVideo?: boolean;
 
     /**
      * Whether or not the tile view is enabled.
@@ -355,7 +365,8 @@ const styles = () => {
             right: 'auto',
             margin: 0,
             marginBottom: '8px',
-            maxHeight: 'calc(100vh - 100px)'
+            maxHeight: 'calc(100vh - 100px)',
+            minWidth: '240px'
         },
 
         hangupMenu: {
@@ -366,7 +377,7 @@ const styles = () => {
             rowGap: '8px',
             margin: 0,
             padding: '16px',
-            marginBottom: '8px'
+            marginBottom: '4px'
         }
     };
 };
@@ -711,6 +722,7 @@ class Toolbox extends Component<IProps> {
      */
     _getAllButtons() {
         const {
+            _customToolbarButtons,
             _feedbackConfigured,
             _hasSalesforce,
             _isIosMobile,
@@ -911,6 +923,19 @@ class Toolbox extends Component<IProps> {
             group: 4
         };
 
+        const customButtons = _customToolbarButtons?.reduce((prev, { icon, id, text }) => {
+            return {
+                ...prev,
+                [id]: {
+                    key: id,
+                    Content: CustomOptionButton,
+                    group: 4,
+                    icon,
+                    text
+                }
+            };
+        }, {});
+
         return {
             microphone,
             camera,
@@ -941,7 +966,8 @@ class Toolbox extends Component<IProps> {
             embed,
             feedback,
             download,
-            help
+            help,
+            ...customButtons
         };
     }
 
@@ -1518,11 +1544,11 @@ class Toolbox extends Component<IProps> {
 function _mapStateToProps(state: IReduxState, ownProps: Partial<IProps>) {
     const { conference } = state['features/base/conference'];
     const { isNarrowLayout } = state['features/base/responsive-ui'];
-    const endConferenceSupported = conference?.isEndConferenceSupported();
+    const endConferenceSupported = conference?.isEndConferenceSupported() && isLocalParticipantModerator(state);
 
     const {
-        buttonsWithNotifyClick,
         callStatsID,
+        customToolbarButtons,
         disableProfile,
         iAmRecorder,
         iAmSipGateway
@@ -1539,11 +1565,12 @@ function _mapStateToProps(state: IReduxState, ownProps: Partial<IProps>) {
     const toolbarButtons = ownProps.toolbarButtons || getToolbarButtons(state);
 
     return {
-        _backgroundType: state['features/virtual-background'].backgroundType,
-        _buttonsWithNotifyClick: buttonsWithNotifyClick,
+        _backgroundType: state['features/virtual-background'].backgroundType ?? '',
+        _buttonsWithNotifyClick: getButtonsWithNotifyClick(state),
         _chatOpen: state['features/chat'].isOpen,
         _clientWidth: clientWidth,
         _conference: conference,
+        _customToolbarButtons: customToolbarButtons,
         _desktopSharingEnabled: JitsiMeetJS.isDesktopSharingEnabled(),
         _desktopSharingButtonDisabled: isDesktopShareButtonDisabled(state),
         _dialog: Boolean(state['features/base/dialog'].component),

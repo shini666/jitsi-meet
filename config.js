@@ -542,12 +542,15 @@ var config = {
     // Disables responsive tiles.
     // disableResponsiveTiles: false,
 
-    // Hides lobby button
+    // DEPRECATED. Please use `securityUi?.hideLobbyButton` instead.
+    // Hides lobby button.
     // hideLobbyButton: false,
 
+    // DEPRECATED. Please use `lobby?.autoKnock` instead.
     // If Lobby is enabled starts knocking automatically.
     // autoKnockLobby: false,
 
+    // DEPRECATED. Please use `lobby?.enableChat` instead.
     // Enable lobby chat.
     // enableLobbyChat: true,
 
@@ -570,6 +573,22 @@ var config = {
     //     disabled: false,
     //     // If set,landing page will redirect to this URL.
     //     customUrl: ''
+    // },
+
+    // Configs for the lobby screen.
+    // lobby {
+    //     // If Lobby is enabled, it starts knocking automatically. Replaces `autoKnockLobby`.
+    //     autoKnock: false,
+    //     // Enables the lobby chat. Replaces `enableLobbyChat`.
+    //     enableChat: true,
+    // },
+
+    // Configs for the security related UI elements.
+    // securityUi: {
+    //     // Hides the lobby button. Replaces `hideLobbyButton`.
+    //     hideLobbyButton: false,
+    //     // Hides the possibility to set and enter a lobby password.
+    //     disableLobbyPassword: false,
     // },
 
     // Disable app shortcuts that are registered upon joining a conference
@@ -798,6 +817,14 @@ var config = {
     // List of pre meeting screens buttons to hide. The values must be one or more of the 5 allowed buttons:
     // 'microphone', 'camera', 'select-background', 'invite', 'settings'
     // hiddenPremeetingButtons: [],
+
+    // An array with custom option buttons for the participant context menu
+    // type:  Array<{ icon: string; id: string; text: string; }>
+    // customParticipantMenuButtons: [],
+
+    // An array with custom option buttons for the toolbar
+    // type:  Array<{ icon: string; id: string; text: string; }>
+    // customToolbarButtons: [],
 
     // Stats
     //
@@ -1335,6 +1362,7 @@ var config = {
      deploymentInfo
      dialOutAuthUrl
      dialOutCodesUrl
+     dialOutRegionUrl
      disableRemoteControl
      displayJids
      externalConnectUrl

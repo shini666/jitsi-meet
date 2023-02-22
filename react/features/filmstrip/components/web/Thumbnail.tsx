@@ -66,6 +66,7 @@ import ThumbnailBottomIndicators from './ThumbnailBottomIndicators';
 import ThumbnailTopIndicators from './ThumbnailTopIndicators';
 // @ts-ignore
 import VirtualScreenshareParticipant from './VirtualScreenshareParticipant';
+/* eslint-enable lines-around-comment */
 
 /**
  * The type of the React {@code Component} state of {@link Thumbnail}.
@@ -336,7 +337,7 @@ const defaultStyles = (theme: Theme) => {
 
         activeSpeaker: {
             '& .active-speaker-indicator': {
-                boxShadow: `inset 0px 0px 0px 4px ${theme.palette.link01Active} !important`
+                boxShadow: `inset 0px 0px 0px 3px ${theme.palette.action01Hover} !important`
             }
         },
 
@@ -1218,6 +1219,7 @@ function _mapStateToProps(state: IReduxState, ownProps: any): Object {
         const { local, remote }
             = tileType === THUMBNAIL_TYPE.VERTICAL
                 ? verticalViewDimensions : horizontalViewDimensions;
+
         // @ts-ignore
         const { width, height } = (isLocal ? local : remote) ?? {};
 
